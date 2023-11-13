@@ -19,7 +19,7 @@ namespace OCTOBER.Server.Data
         {
             base.OnModelCreating(builder);
 
-            builder.HasDefaultSchema("LAB2")
+            builder.HasDefaultSchema("UD_MBOCELLI")
                 .HasAnnotation("Relational:Collation", "USING_NLS_COMP");
 
             builder.ToUpperCaseTables();

@@ -33,7 +33,7 @@ namespace OCTOBER.EF.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasDefaultSchema("LAB2")
+            modelBuilder.HasDefaultSchema("UD_MBOCELLI")
                 .UseCollation("USING_NLS_COMP");
 
             modelBuilder.Entity<AspNetUser>(entity =>
