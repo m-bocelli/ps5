@@ -32,8 +32,8 @@ namespace OCTOBER.Server.Controllers.UD
 
 
         [HttpGet]
-        [Route("Get/{CourseNo}")]
-        public async Task<IActionResult> Get(int CourseNo)
+        [Route("Get/{CourseNo}/{SchoolId}")]
+        public async Task<IActionResult> Get(int CourseNo, int SchoolId)
         {
             try
             {
@@ -41,7 +41,7 @@ namespace OCTOBER.Server.Controllers.UD
 
                 CourseDTO? result = await _context
                     .Courses
-                    .Where(x => x.CourseNo == CourseNo)
+                    .Where(x => x.CourseNo == CourseNo && x.SchoolId == SchoolId)
                      .Select(sp => new CourseDTO
                      {
                          Cost = sp.Cost,
@@ -51,7 +51,9 @@ namespace OCTOBER.Server.Controllers.UD
                          Description = sp.Description,
                          ModifiedBy = sp.ModifiedBy,
                          ModifiedDate = sp.ModifiedDate,
-                         Prerequisite = sp.Prerequisite
+                         Prerequisite = sp.Prerequisite,
+                         SchoolId = sp.SchoolId,
+                         PrerequisiteSchoolId = sp.PrerequisiteSchoolId,
                      })
                 .SingleOrDefaultAsync();
 
@@ -83,7 +85,9 @@ namespace OCTOBER.Server.Controllers.UD
                     Description = sp.Description,
                     ModifiedBy = sp.ModifiedBy,
                     ModifiedDate = sp.ModifiedDate,
-                    Prerequisite = sp.Prerequisite
+                    Prerequisite = sp.Prerequisite,
+                    SchoolId = sp.SchoolId,
+                    PrerequisiteSchoolId = sp.PrerequisiteSchoolId,
                 })
                 .ToListAsync();
                 await _context.Database.RollbackTransactionAsync();
@@ -103,14 +107,11 @@ namespace OCTOBER.Server.Controllers.UD
         public async Task<IActionResult> Post([FromBody]
                                                 CourseDTO _CourseDTO)
         {
-
-            Debugger.Launch();
-
             try
             {
                 await _context.Database.BeginTransactionAsync();
 
-                var itm = await _context.Courses.Where(x => x.CourseNo == _CourseDTO.CourseNo).FirstOrDefaultAsync();
+                var itm = await _context.Courses.Where(x => x.CourseNo == _CourseDTO.CourseNo && x.SchoolId == _CourseDTO.SchoolId).FirstOrDefaultAsync();
 
                 if (itm == null)
                 {
@@ -119,7 +120,9 @@ namespace OCTOBER.Server.Controllers.UD
                         Cost = _CourseDTO.Cost,
                         CourseNo = _CourseDTO.CourseNo,
                         Description = _CourseDTO.Description,
-                        Prerequisite = _CourseDTO.Prerequisite
+                        Prerequisite = _CourseDTO.Prerequisite,
+                        SchoolId = _CourseDTO.SchoolId,
+                        PrerequisiteSchoolId = _CourseDTO.PrerequisiteSchoolId,
                     };
                     _context.Courses.Add(c);
                     await _context.SaveChangesAsync();
@@ -141,20 +144,21 @@ namespace OCTOBER.Server.Controllers.UD
         public async Task<IActionResult> Put([FromBody]
                                                 CourseDTO _CourseDTO)
         {
-
-            Debugger.Launch();
-
             try
             {
                 await _context.Database.BeginTransactionAsync();
 
-                var itm = await _context.Courses.Where(x => x.CourseNo == _CourseDTO.CourseNo).FirstOrDefaultAsync();
+                var itm = await _context.Courses.Where(x => x.CourseNo == _CourseDTO.CourseNo && x.SchoolId == _CourseDTO.SchoolId).FirstOrDefaultAsync();
 
-                itm.Description = _CourseDTO.Description;
-                itm.Cost = _CourseDTO.Cost;
-                itm.Prerequisite = _CourseDTO.Prerequisite;
+                if (itm != null)
+                {
+                    itm.Description = _CourseDTO.Description;
+                    itm.Cost = _CourseDTO.Cost;
+                    itm.Prerequisite = _CourseDTO.Prerequisite;
+                    itm.PrerequisiteSchoolId = _CourseDTO.PrerequisiteSchoolId;
+                    _context.Courses.Update(itm);
+                }
 
-                _context.Courses.Update(itm);
                 await _context.SaveChangesAsync();
                 await _context.Database.CommitTransactionAsync();
 
@@ -170,17 +174,14 @@ namespace OCTOBER.Server.Controllers.UD
 
 
         [HttpDelete]
-        [Route("Delete/{CourseNo}")]
-        public async Task<IActionResult> Delete(int CourseNo)
+        [Route("Delete/{CourseNo}/{SchoolId}")]
+        public async Task<IActionResult> Delete(int CourseNo, int SchoolId)
         {
-
-            Debugger.Launch();
-
             try
             {
                 await _context.Database.BeginTransactionAsync();
 
-                var itm = await _context.Courses.Where(x => x.CourseNo == CourseNo).FirstOrDefaultAsync();
+                var itm = await _context.Courses.Where(x => x.CourseNo == CourseNo && x.SchoolId == SchoolId).FirstOrDefaultAsync();
 
                 if (itm != null)
                 {
@@ -197,6 +198,16 @@ namespace OCTOBER.Server.Controllers.UD
                 //List<OraError> DBErrors = ErrorHandling.TryDecodeDbUpdateException(Dex, _OraTranslateMsgs);
                 return StatusCode(StatusCodes.Status417ExpectationFailed, "An Error has occurred");
             }
+        }
+
+        public Task<IActionResult> Delete(int KeyVal)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IActionResult> Get(int KeyVal)
+        {
+            throw new NotImplementedException();
         }
     }
 }

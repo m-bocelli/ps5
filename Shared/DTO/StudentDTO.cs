@@ -43,6 +43,8 @@ namespace OCTOBER.Shared.DTO
         [Unicode(false)]
         public string ModifiedBy { get; set; } = null!;
         public DateTime ModifiedDate { get; set; }
-
+        [Key]
+        [Precision(8)]
+        public int SchoolId { get; set; }
     }
 }
